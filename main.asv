@@ -1,26 +1,7 @@
 function [Dx, Dy] = differential_matrices(M, N)
-    Dx = zeros(M*N, M*N);
-    Dy = zeros(M*N, M*N);
-    
-    for j = 1:N
-        for i = 1:M-1
-            idx = i + (j-1) * M;
-            Dx(idx, idx) = 1;
-            Dx(idx, idx + 1) = -1;
-        end
-    end
-    
-    for j = 1:N-1
-        for i = 1:M
-            idx = i + (j-1) * M;
-            Dy(idx, idx) = 1;
-            Dy(idx, idx + M) = -1;
-        end
-    end
-    
     size = M*N;
     indices = 1:size;
-    values = [repelem(1, size), repelem(-1, size)]; % Assign M*N ones then M*N minus ones
+    values = [repelem(1, size-M), repelem(-1, size-M)]; % Assign M*N ones then M*N minus ones
     
     % Ones assigned to diagonals and minus ones assigned to diagonal moved
     % right by one but without modulo M indices or last row input indices
@@ -35,17 +16,45 @@ function [Dx, Dy] = differential_matrices(M, N)
     Dy_cols = [without_last_col, without_last_col + M];
 
     Dx = sparse(Dx_rows, Dx_cols, values, size, size);
-    
     Dy = sparse(Dy_rows, Dy_cols, values, size, size);
-
 end
 
-M = 5;
-N = 5;
+function [DxX, DyX] = differantiate(X)
+    [M, N] = size(X);
+    X = reshape(X, M*N, 1);
+    [Dx, Dy] = differential_matrices(M, N);
+    DxX = reshape(Dx * X, M, N);
+    DyX = reshape(Dy * X, M, N);
+end
 
-[Dx, Dy] = differential_matrices(M, N);
-disp('Dx:');
-disp(full(Dx));  % Display Dx in full matrix form
+function Y = normalize(X)
+    min_X = min(X,[],"all");
+    max_X = max(X,[],"all");
+    Y = (X - min_X) / (max_X - min_X);
+end
 
-disp('Dy:');
-disp(full(Dy));  % Display Dy in full matrix form
+function show_differentials(X)
+    [DxX, DyX] = differantiate(X);
+    subplot(2, 2, 1);
+
+load("X1.mat")
+load("X2.mat")
+load("X3.mat")
+
+[DxX1, DyX1] = differantiate(X1);
+[DxX2, DyX2] = differantiate(X2);
+[DxX3, DyX3] = differantiate(X3);
+
+MX1 = sqrt(DxX1.^2 + DyX1.^2);
+MX2 = sqrt(DxX2.^2 + DyX2.^2);
+MX3 = sqrt(DxX3.^2 + DyX3.^2);
+
+subplot(4, 3, 1);
+subplot('Position', 1)
+imshow(normalize(X1));
+subplot('Position', 2)
+imshow(normalize(DxX1));
+subplot('Position', 3)
+imshow(normalize(DyX1));
+subplot('Position', 4)
+imshow(normalize(MX1));
