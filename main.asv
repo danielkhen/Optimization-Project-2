@@ -1,7 +1,26 @@
 function [Dx, Dy] = differential_matrices(M, N)
+    Dx = zeros(M*N, M*N);
+    Dy = zeros(M*N, M*N);
+    
+    for j = 1:N
+        for i = 1:M-1
+            idx = i + (j-1) * M;
+            Dx(idx, idx) = 1;
+            Dx(idx, idx + 1) = -1;
+        end
+    end
+    
+    for j = 1:N-1
+        for i = 1:M
+            idx = i + (j-1) * M;
+            Dy(idx, idx) = 1;
+            Dy(idx, idx + M) = -1;
+        end
+    end
+    
     size = M*N;
     indices = 1:size;
-    values = [repelem(1, size-M), repelem(-1, size-M)]; % Assign M*N ones then M*N minus ones
+    values = [repelem(1, size), repelem(-1, size)]; % Assign M*N ones then M*N minus ones
     
     % Ones assigned to diagonals and minus ones assigned to diagonal moved
     % right by one but without modulo M indices or last row input indices
@@ -16,7 +35,9 @@ function [Dx, Dy] = differential_matrices(M, N)
     Dy_cols = [without_last_col, without_last_col + M];
 
     Dx = sparse(Dx_rows, Dx_cols, values, size, size);
+    
     Dy = sparse(Dy_rows, Dy_cols, values, size, size);
+
 end
 
 M = 5;
