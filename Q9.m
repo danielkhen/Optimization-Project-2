@@ -31,6 +31,11 @@ L = [Dx; Dy];
 Q = A' * A + lambda * (L' * L);
 
 eigenvalues = eig(Q)
+condition_number = eigenvalues(25) / eigenvalues(1)
+
 format long
 disp(eigenvalues)
-disp(eigenvalues(25) / eigenvalues(1))
+disp(condition_number)
+
+k = log(1/(10*condition_number)) / log(1 - 1/condition_number)
+condition_number * (1 - 1/condition_number)^20341455
