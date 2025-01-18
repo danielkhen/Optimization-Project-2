@@ -4,7 +4,7 @@ Usage : displayVolumeSliceGUI(X)  , where X is the 3D volumetric array
 credit: Ohad Menashe
 %}
 
-close all
+% close all
 
 fh = figure('name','VolumeSliceGUI','NumberTitle','off','menubar','none','toolBar','figure');
 h = guidata(fh);

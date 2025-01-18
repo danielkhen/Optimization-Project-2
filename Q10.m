@@ -65,6 +65,7 @@ end
 
 Y = load("Y.mat");
 Y = Y.Y;
+y = Y(:); % Flatten Y into a column vector
 y = nonzeros(Y);
 M = 5;
 N = 5;
@@ -104,7 +105,7 @@ L = [Dx; Dy];
 % Parameters for regularization
 lambda = 1e-5;
 tol = 1e-5;
-maxIter = 5000000;
+maxIter = 5000000; % Set high number to ensure convergence
 
 % Solve using CGLS
 x = cgls(A, L, y, lambda, tol, maxIter);
@@ -112,14 +113,12 @@ x = cgls(A, L, y, lambda, tol, maxIter);
 
 
 
-%%
+%% Q11
 % Load data
 A = load('Small/A.mat'); % Load ray-path matrix
-% A = load('Large/A.mat'); % Load ray-path matrix
 
 A = A.A;
 Y = load('Small/y.mat'); % Load observations
-% Y = load('Large/y.mat'); % Load observations
 Y = Y.y;
 
 % Define regularization matrices
@@ -149,7 +148,7 @@ displayVolumeSliceGUI(X);
 
 %% Q11 - 3D Reconstruction with CGLS
 
-% Load the data for the small bag
+% Load data
 data = load('Small/y.mat'); % Normalized attenuation (observations)
 y = data.y;
 
@@ -160,23 +159,24 @@ A = ray_path_data.A;
 n = 19; % Grid size (19x19x19)
 size_3D = n^3; % Total voxels in the 3D grid
 
-% Construct 3D derivative matrices (Dx, Dy, Dz)
-Dx = spdiags([-ones(size_3D,1), ones(size_3D,1)], [0, 1], size_3D, size_3D);
-Dy = spdiags([-ones(size_3D,1), ones(size_3D,1)], [0, n], size_3D, size_3D);
-Dz = spdiags([-ones(size_3D,1), ones(size_3D,1)], [0, n^2], size_3D, size_3D);
+% Construct 3D finite difference derivative matrices
+I = speye(n);
+Dx = kron(speye(n^2), spdiags([-ones(n,1), ones(n,1)], [0,1], n, n));
+Dy = kron(speye(n), kron(spdiags([-ones(n,1), ones(n,1)], [0,1], n, n), I));
+Dz = kron(spdiags([-ones(n,1), ones(n,1)], [0,1], n, n), speye(n^2));
 
-% Zero derivatives on boundaries
-Dx(size_3D-n+1:end, :) = 0;
-Dy(size_3D-n*n+1:end, :) = 0;
-Dz(size_3D-n*n^2+1:end, :) = 0;
+% Apply Neumann boundary conditions (zero gradient at boundaries)
+Dx(end-n+1:end, :) = 0;
+Dy(end-n^2+1:end, :) = 0;
+Dz(end-n^3+1:end, :) = 0;
 
 % Regularization matrix
 L = [Dx; Dy; Dz];
 
-% Regularization parameter
-lambda_values = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1]; % Test with different lambda values
+% Regularization parameters
+lambda_values = [1e-5, 1e-2, 1]; % Test with different lambda values
 tol = 1e-5; % Convergence tolerance
-maxIter = 2000; % Maximum number of iterations
+maxIter = 20000; % Maximum number of iterations
 
 for lambda = lambda_values
     fprintf('\nSolving with lambda = %.1e\n', lambda);
@@ -190,15 +190,11 @@ for lambda = lambda_values
     % Compute and display the objective value
     obj_value = 0.5 * norm(y - A * x)^2 + (lambda / 2) * norm(L * x)^2;
     fprintf('Objective value: %.4f\n', obj_value);
-    
-    % Visualize slices of the reconstructed volume
-    % figure;
-    % slice(X, round(n/2), round(n/2), round(n/2));
-    % title(sprintf('Reconstructed Volume (lambda = %.1e)', lambda));
-    % xlabel('X'); ylabel('Y'); zlabel('Z');
-    % colorbar;
-    % axis tight;
 
+    % Display the reconstructed volume
     displayVolumeSliceGUI(X);
 
+    % Add a title to the figure
+    fig = gcf; % Get current figure handle
+    sgtitle(sprintf('3D Reconstruction with \\lambda = %.1e', lambda));
 end
