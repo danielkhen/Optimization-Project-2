@@ -1,13 +1,13 @@
-%% Q15 - Iteratively reweighted Least Squares (IRLS)
+%% Q16 - The large bag
 % Load data
-data = load('Small/y.mat'); % Normalized attenuation (observations)
+data = load('Large/y.mat'); % Normalized attenuation (observations)
 y = data.y;
 
-ray_path_data = load('Small/A.mat'); % Ray path matrix
+ray_path_data = load('Large/A.mat'); % Ray path matrix
 A = ray_path_data.A;
 
 % Dimensions of the 3D volume (Small bag)
-n = 19; % Grid size (19x19x19)
+n = 49; % Grid size (19x19x19)
 size_3D = n^3; % Total voxels in the 3D grid
 
 % Construct 3D finite difference derivative matrices
@@ -49,19 +49,3 @@ sgtitle(sprintf('L2 regularization'));
 displayVolumeSliceGUI(X);
 fig = gcf; % Get current figure handle
 sgtitle(sprintf('L1 regularization'));
-
-figure;
-x_slices = [6, 9, 12];
-subplot(1, 2, 1);
-slice(X_start, x_slices, [], []); % Reconstruction from problem (3)
-title('L2 regularization');
-
-subplot(1, 2, 2);
-slice(X, x_slices, [], []); % Reconstruction from problem (6)
-title('L1 regularization');
-
-figure;
-plot(losses);
-xlabel("Iteration number");
-ylabel("Objective value (6)");
-title("Objective function per IRLS iteration");

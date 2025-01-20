@@ -30,12 +30,11 @@ A = sparse(A_rows, A_cols, A_values, observations, size);
 L = [Dx; Dy];
 Q = A' * A + lambda * (L' * L);
 
-eigenvalues = eig(Q)
-condition_number = eigenvalues(25) / eigenvalues(1)
+eigenvalues = eig(Q);
+condition_number = eigenvalues(25) / eigenvalues(1);
+fprintf('Condition number (highest divided by lowest eigenvalues): %d.\n', condition_number);
 
 format long
-disp(eigenvalues)
-disp(condition_number)
 
-k = log(1/(10*condition_number)) / log(1 - 1/condition_number)
-condition_number * (1 - 1/condition_number)^20341455
+k = log(1/(10*condition_number)) / log(1 - 1/condition_number);
+fprintf('Iteration for lowering the objective by 10: %d.\n', k);
