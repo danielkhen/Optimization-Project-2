@@ -1,3 +1,4 @@
+%% Q4 - Differentiating images
 function Y = normalize(X)
     min_X = min(X,[],"all");
     max_X = max(X,[],"all");

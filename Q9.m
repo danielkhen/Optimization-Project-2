@@ -1,3 +1,4 @@
+%% Q9 - Condition number and convergence in GD of toy problem
 M = 5;
 N = 5;
 size = M * N;
@@ -37,4 +38,4 @@ fprintf('Condition number (highest divided by lowest eigenvalues): %d.\n', condi
 format long
 
 k = log(1/(10*condition_number)) / log(1 - 1/condition_number);
-fprintf('Iteration for lowering the objective by 10: %d.\n', k);
+fprintf('Iteration for lowering the objective by 10 in GD: %d.\n', k);
